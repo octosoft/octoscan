@@ -75,10 +75,6 @@ class OctoscanArchive(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
-    def _queue_warning(self, warning_id, message):
-        # type: (int,str) -> None
-        self._warning_list.append((warning_id, message))
-
     @staticmethod
     def _eprint(*args, **kwargs):
         print(*args, file=sys.stderr, **kwargs)
@@ -86,6 +82,10 @@ class OctoscanArchive(object):
     def _verbose_trace(self, *args, **kwargs):
         if self._verbose:
             self._eprint(*args, **kwargs)
+
+    def queue_warning(self, warning_id, message):
+        # type: (int,str) -> None
+        self._warning_list.append((warning_id, message))
 
     def is_windows(self):
         # type: () -> bool
@@ -167,14 +167,14 @@ class OctoscanArchive(object):
         """
 
         if not os.path.exists(path):
-            self._queue_warning(1001, "add_file cannot read " + path + " does not exist")
+            self.queue_warning(1001, "add_file cannot read " + path + " does not exist")
             return
         try:
             with open(path, "r") as f:
                 self._verbose_trace("add_file:  " + path)
                 self.add_str(f.read(), name, datetime.fromtimestamp(os.path.getmtime(path)))
         except IOError as e:
-            self._queue_warning(1001, "cannot read " + path + ": " + e.message)
+            self.queue_warning(1001, "cannot read " + path + ": " + e.message)
 
     def add_folder(self, path, name):
         # type: (str,str) -> None

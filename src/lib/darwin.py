@@ -9,9 +9,39 @@ import os
 import subprocess
 import platform
 
+from glob import glob
+
 if 'darwin' in platform.system().lower():
     # noinspection PyUnresolvedReferences
     from SystemConfiguration import SCDynamicStoreCreate, SCDynamicStoreCopyValue
+
+
+# noinspection PyUnusedLocal
+def scan_darwin_apps(scan, options):
+    """
+    get installed application plist files
+    :param scan:
+    :param options:
+    :return:
+    """
+    i = 0
+    for plist in glob("/Applications/*/Contents/Info.plist"):
+        i = i + 1
+        scan.add_file(plist, "apps/app_" + str(i) + ".plist")
+
+
+# noinspection PyUnusedLocal
+def scan_darwin_java(scan, options):
+    """
+    get installed java plist files
+    :param scan:
+    :param options:
+    :return:
+    """
+    i = 0
+    for plist in glob("/Library/Java/JavaVirtualMachines/*/Contents/Info.plist"):
+        i = i + 1
+        scan.add_file(plist, "java/java_" + str(i) + ".plist")
 
 
 # noinspection PyUnusedLocal
@@ -89,3 +119,7 @@ def scan_darwin(scan, options):
 
     if scan.command_exists('brew'):
         scan.add_command_output(['brew', 'info', '--json=v1', '--installed'], 'cmd/brew.json')
+
+    scan_darwin_java(scan, options)
+
+    scan_darwin_apps(scan, options)
