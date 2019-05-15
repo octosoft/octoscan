@@ -21,7 +21,7 @@ FILE=$(./octoscan.pyz -o /tmp)
 The program emits the generated filename to stdout, use the variable `${FILE}` to further process the file. 
 You are completely free on how to transfer the generated files to the OctoSAM Import Service import folder.
 
-#### Using octo-collect the Octosoft Web-based Upload Server
+#### Using [octo-collect](https://github.com/octosoft/octopus-resty) the Octosoft Web-based Upload Server
 
 Octosoft provides a high-performance upload server based on [openresty](https://openresty.org).
 Use the curl utility on Linux and Mac to upload the generated file.
