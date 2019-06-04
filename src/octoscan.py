@@ -25,7 +25,9 @@ def scan_platform(scan, options):
 
 
 def main():
+
     parser = OptionParser()
+
     parser.add_option("-o", "--outputfolder", dest="output_folder",
                       default=".",
                       help="write output file to specified directory")
@@ -35,12 +37,16 @@ def main():
     parser.add_option("-u", "--uuid", dest="uuid",
                       help="specify unique id to use",
                       default=str(uuid1()))
+    parser.add_option("-S", "--sudo", dest="sudo",
+                      action="store_true",
+                      help="use sudo to access protected resources, sudoers has to allow no password access")
 
     (options, args) = parser.parse_args()
 
     with OctoscanArchive(output_folder=options.output_folder,
                          uuid=options.uuid,
-                         verbose=options.verbose
+                         verbose=options.verbose,
+                         sudo=options.sudo
                          ) as scan:
 
         print(scan.filename)

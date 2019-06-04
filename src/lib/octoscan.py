@@ -8,11 +8,11 @@ from __future__ import print_function
 import sys
 import os
 import platform
+import subprocess
 
 from datetime import datetime
 from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
 from socket import getfqdn
-from subprocess import check_output
 from uuid import uuid1
 from xml.dom.minidom import Document, Element
 from .octoscan_build import octoscan_build
@@ -25,17 +25,22 @@ class OctoscanArchive(object):
         as well as to build the standardized octoscan.xml document.
     """
 
-    def __init__(self, output_folder=".", uuid=None, ext=".scal", verbose=False):
-        # type: (str,str,str,bool) -> None
+    def __init__(self, output_folder=".", uuid=None, ext=".scal", verbose=False, sudo=False):
+        # type: (str,str,str,bool,bool) -> None
         self._platform = platform.platform()
         self._verbose = verbose
         self._start = datetime.now()
+        self._sudo = sudo
 
         if uuid:
             assert (isinstance(uuid, str))
             self.uuid = uuid
         else:
             self.uuid = str(uuid1())
+
+        # if not os.path.exists(output_folder):
+        #    self._eprint("output folder '"+output_folder + "' does not exist")
+        #    exit(2)
 
         # are we on windows (module tests?)
 
@@ -52,7 +57,15 @@ class OctoscanArchive(object):
             ext = ".scam"
 
         self.filename = os.path.join(output_folder, self.uuid + ext)
-        self.zip = ZipFile(self.filename, 'w')
+
+        try:
+            self.zip = ZipFile(self.filename, 'w')
+        except Exception as e:
+            # errno 2: output folder does not exist
+            # errno 20: output folder is not a directory
+            self._eprint(str(e))
+            exit(2)
+
         self._warning_list = []
 
         self._verbose_trace("platform: " + self._platform)
@@ -107,6 +120,24 @@ class OctoscanArchive(object):
         :return: True if the scanner is running on linux
         """
         return self._is_linux
+
+    def check_output(self,*popenargs, **kwargs):
+        r"""Run command with arguments and return its output as a byte string.
+        Backported from Python 2.7 as it's implemented as pure python on stdlib.
+        >>> check_output(['/usr/bin/python', '--version'])
+        Python 2.6.2
+        """
+        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get("args")
+            if cmd is None:
+                cmd = popenargs[0]
+            error = subprocess.CalledProcessError(retcode, cmd)
+            error.output = output
+            raise error
+        return output
 
     def close(self):
         # type: () -> None
@@ -174,7 +205,10 @@ class OctoscanArchive(object):
                 self._verbose_trace("add_file:  " + path)
                 self.add_str(f.read(), name, datetime.fromtimestamp(os.path.getmtime(path)))
         except IOError as e:
-            self.queue_warning(1001, "cannot read " + path + ": " + e.message)
+            if self._sudo:
+                self.add_file_sudo(path, name)
+            else:
+                self.queue_warning(1001, "cannot read " + path + ": " + e.message)
 
     def add_folder(self, path, name):
         # type: (str,str) -> None
@@ -199,6 +233,15 @@ class OctoscanArchive(object):
             for path in os.environ["PATH"].split(os.pathsep)
         )
 
+    def add_file_sudo(self, path, name):
+        # type: (str,str) -> None
+        """
+        :param path: path to a file that can be read only with privileges
+        :param name: name where to store the data in the zip archive
+        """
+        self._verbose_trace("add_file_sudo:  " + path)
+        self.add_command_output(["sudo", "cat", path], name)
+
     def add_command_output(self, cmd, name):
         """
         :param cmd:
@@ -207,7 +250,7 @@ class OctoscanArchive(object):
         """
         if self.command_exists(cmd[0]):
             self._verbose_trace("add_command_output:  " + str(cmd))
-            output = check_output(cmd)
+            output = self.check_output(cmd)
             self.add_str(output, name)
         else:
             self._verbose_trace("add_command_output:  " + str(cmd) + ": command not found")

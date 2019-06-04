@@ -38,7 +38,17 @@ then
 fi
 ```
 
-Depending on your setup, you will want to save the file if it cannot be uploaded and re-try to upload saved files.
+### Using sudo on Linux
+
+The `--sudo` option allows to run octoscan on Linux Servers under a non-privileged account 
+if certain sudo rules allow password free access the following commands:
+
+```bash
+cat /sys/class/dmi/id/*              
+cat /proc/*/environ
+```
+
+To use this feature you must have centralized maintenance mechanisms for /etc/sudoers in place. 
 
 ### Python Version
 
