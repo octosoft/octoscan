@@ -55,10 +55,7 @@ def main():
             scan_platform(scan, options)
         except Exception as e:
             # noinspection PyProtectedMember
-            if hasattr(e, 'message'):
-                scan.queue_warning(9001, "Exception: " + e.message)
-            else:
-                scan.queue_warning(9001, "Exception: " + repr(e))
+            scan.queue_warning(9001, "Exception: " + repr(e))
 
 
 if __name__ == '__main__':
