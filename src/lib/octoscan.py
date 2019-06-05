@@ -208,7 +208,7 @@ class OctoscanArchive(object):
             if self._sudo:
                 self.add_file_sudo(path, name)
             else:
-                self.queue_warning(1001, "cannot read " + path + ": " + e.message)
+                self.queue_warning(1001, "cannot read " + path + ": " + str(e))
 
     def add_folder(self, path, name):
         # type: (str,str) -> None
