@@ -77,7 +77,8 @@ def scan_linux(scan, options):
     scan.add_command_output(["ip", "addr"], "cmd/ip_addr")
     scan.add_command_output(["ps", "-ef"], "cmd/ps_ef")
     scan.add_command_output(["hostnamectl", "status"], "cmd/hostnamectl")
-    scan.add_command_output(["service", "--status-all"], "cmd/service_status_all")
+    # TODO: test/debug on SLES11
+    # scan.add_command_output(["service", "--status-all"], "cmd/service_status_all")
     scan.add_command_output(["systemctl", "list-units", "-all", "--no-page"], "cmd/systemctl_units_all")
 
     params = read_hyperv_parameters()

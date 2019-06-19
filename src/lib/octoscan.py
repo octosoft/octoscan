@@ -63,7 +63,7 @@ class OctoscanArchive(object):
         except Exception as e:
             # errno 2: output folder does not exist
             # errno 20: output folder is not a directory
-            self._eprint(str(e))
+            self._eprint(repr(e))
             exit(2)
 
         self._warning_list = []
@@ -121,10 +121,9 @@ class OctoscanArchive(object):
         """
         return self._is_linux
 
-    def check_output(self,*popenargs, **kwargs):
+    def check_output(self, *popenargs, **kwargs):
         r"""Run command with arguments and return its output as a byte string.
         Backported from Python 2.7 as it's implemented as pure python on stdlib.
-        >>> check_output(['/usr/bin/python', '--version'])
         Python 2.6.2
         """
         process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
@@ -198,7 +197,7 @@ class OctoscanArchive(object):
         """
 
         if not os.path.exists(path):
-            self.queue_warning(1001, "add_file cannot read " + path + " does not exist")
+            self.queue_warning(1001, "add_file cannot read '" + path + "': file does not exist")
             return
         try:
             with open(path, "r") as f:
@@ -208,7 +207,9 @@ class OctoscanArchive(object):
             if self._sudo:
                 self.add_file_sudo(path, name)
             else:
-                self.queue_warning(1001, "cannot read " + path + ": " + str(e))
+                self.queue_warning(1002, "cannot read " + path + ": " + repr(e))
+        except Exception as e:
+            self.queue_warning(1003, "cannot read " + path + ": " + repr(e))
 
     def add_folder(self, path, name):
         # type: (str,str) -> None
@@ -217,10 +218,11 @@ class OctoscanArchive(object):
         :param name:
         :return:
         """
-        for root, dirs, files in os.walk(path):
-            for f in files:
-                self.add_file(os.path.join(root, f), os.path.join(name, f))
-
+        self._verbose_trace("add_folder: " + path)
+        for f in os.listdir(path):
+            if os.path.isfile(os.path.join(path,f)):
+                self.add_file(os.path.join(path,f), os.path.join(name,f))
+   
     @staticmethod
     def command_exists(cmd):
         # type: (str) -> bool
@@ -248,12 +250,15 @@ class OctoscanArchive(object):
         :param name:
         :return:
         """
-        if self.command_exists(cmd[0]):
-            self._verbose_trace("add_command_output:  " + str(cmd))
-            output = self.check_output(cmd)
-            self.add_str(output, name)
-        else:
-            self._verbose_trace("add_command_output:  " + str(cmd) + ": command not found")
+        try:
+            if self.command_exists(cmd[0]):
+                self._verbose_trace("add_command_output:  " + str(cmd))
+                output = self.check_output(cmd)
+                self.add_str(output, name)
+            else:
+                self._verbose_trace("add_command_output:  " + str(cmd) + ": command not found")
+        except Exception as e:
+            self.queue_warning(1004, "add_command_output exception " + repr(cmd) + ": " + repr(e))
 
     def create_element(self, tag_name):
         # type: (str) -> Element
