@@ -220,9 +220,9 @@ class OctoscanArchive(object):
         """
         self._verbose_trace("add_folder: " + path)
         for f in os.listdir(path):
-            if os.path.isfile(os.path.join(path,f)):
-                self.add_file(os.path.join(path,f), os.path.join(name,f))
-   
+            if os.path.isfile(os.path.join(path, f)):
+                self.add_file(os.path.join(path, f), os.path.join(name, f))
+
     @staticmethod
     def command_exists(cmd):
         # type: (str) -> bool

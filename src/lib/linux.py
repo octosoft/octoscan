@@ -9,6 +9,10 @@ import os
 import platform
 import glob
 
+if 'linux' in platform.system().lower():
+    # noinspection PyUnresolvedReferences
+    import pwd
+
 
 # noinspection PyCompatibility
 def read_hyperv_parameters():
@@ -29,6 +33,17 @@ def read_hyperv_parameters():
     return params
 
 
+def scan_linux_user(scan, options):
+    user_elem = scan.create_element("user")
+    scan.append_info_element(user_elem, "user_id", "I", str(os.getuid()))
+    # noinspection PyBroadException
+    try:
+        scan.append_info_element(user_elem, "login", "S", os.getlogin())
+    except Exception:
+        scan.append_info_element(user_elem, "login", "S", pwd.getpwuid(os.getuid())[0])
+    scan.append_child(user_elem)
+
+
 # noinspection PyUnusedLocal
 def scan_linux(scan, options):
     """
@@ -40,10 +55,10 @@ def scan_linux(scan, options):
     # deprecated in python 3.8 -> distro package
     (distribution, version, distribution_id) = platform.linux_distribution()
 
-    user_elem = scan.create_element("user")
-    scan.append_info_element(user_elem, "login", "S", os.getlogin())
-    scan.append_info_element(user_elem, "user_id", "I", str(os.getuid()))
-    scan.append_child(user_elem)
+    try:
+        scan_linux_user(scan, options)
+    except Exception as e:
+        scan.queue_warning(2001, "scan_linux_user failed:" + repr(e))
 
     os_elem = scan.create_element("operating_system")
     scan.append_info_element(os_elem, "distribution", "S", distribution)
