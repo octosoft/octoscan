@@ -33,6 +33,7 @@ def read_hyperv_parameters():
     return params
 
 
+# noinspection PyUnusedLocal
 def scan_linux_user(scan, options):
     user_elem = scan.create_element("user")
     scan.append_info_element(user_elem, "user_id", "I", str(os.getuid()))
@@ -67,7 +68,13 @@ def scan_linux(scan, options):
     scan.append_info_element(os_elem, "platform", "S", platform.platform())
     scan.append_child(os_elem)
 
+    # collect various _release info files. if systemctl standard os_release is present this
+    # will get parsed on import, otherwise some heuristics will be applied on all available release files
     for release_info in glob.glob1("/etc", "*-release"):
+        scan.add_file(os.path.join("/etc", release_info), os.path.join("release", release_info))
+
+    # collect debian_version if it exists
+    for release_info in glob.glob1("/etc", "*_version"):
         scan.add_file(os.path.join("/etc", release_info), os.path.join("release", release_info))
 
     for proc_file in ["cpuinfo", "meminfo", "scsi/scsi", "version", "version_signature"]:
