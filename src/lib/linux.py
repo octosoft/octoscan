@@ -45,6 +45,33 @@ def scan_linux_user(scan, options):
     scan.append_child(user_elem)
 
 
+def scan_linux_memory_size(scan, options):
+    """
+    Try to find out the real physical memory size. dmidecode needs root, proc/meminfo does not show the real
+    physical memory.
+    :param scan:
+    :param options:
+    :return:
+    """
+    # noinspection PyBroadException
+    try:
+        if os.path.exists("/sys/devices/system/memory/block_size_bytes"):
+            with open("/sys/devices/system/memory/block_size_bytes") as f:
+                block = str(f.read()).strip()
+                block_size = int(block, 16)
+
+            total_memory_bytes = 0
+
+            for m in glob.glob("/sys/devices/system/memory/memory*"):
+                with open(os.path.join(m, "online")) as f:
+                    online = str(f.read()).strip()
+                    if online == "1":
+                        total_memory_bytes = total_memory_bytes + block_size
+            scan.add_str(str(total_memory_bytes) + "", "sys/devices/system/memory/octoscan_total_memory")
+    except Exception as e:
+        pass
+
+
 # noinspection PyUnusedLocal
 def scan_linux(scan, options):
     """
@@ -110,3 +137,5 @@ def scan_linux(scan, options):
         for k in params.keys():
             scan.append_info_element(hyper_elem, k, "S", params[k])
         scan.append_child(hyper_elem)
+
+    scan_linux_memory_size(scan, options)
