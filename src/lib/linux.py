@@ -67,7 +67,7 @@ def scan_linux_memory_size(scan, options):
                     online = str(f.read()).strip()
                     if online == "1":
                         total_memory_bytes = total_memory_bytes + block_size
-            scan.add_str(str(total_memory_bytes) + "", "sys/devices/system/memory/octoscan_total_memory")
+            scan.add_str(str(total_memory_bytes) + "\n", "sys/devices/system/memory/octoscan_total_memory")
     except Exception as e:
         pass
 
