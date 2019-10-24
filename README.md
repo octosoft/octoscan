@@ -13,6 +13,7 @@ Typically the scanner is invoked using existing management infrastructure.
 
 On workstations and client systems, it's highly recommended to start the scanner in the user's 
 context (logon scripts etc.) as that gives you valuable device affinity information. 
+
 On servers, the scanner should be started in the root context, otherwise scanned information
 may be incomplete.
 
@@ -38,17 +39,21 @@ then
 fi
 ```
 
-### Using sudo on Linux
+### Linux Java Process Scan
+On Linux, octoscan performs an in-depth scan of running java processes. If run under root or if the -sudo option
+is set the scan will read all java processes. Otherwise it reads processes running under the same user as the scan only.
+If not running under root, the scan user must have permissions to start all detected java binaries.
+For best java scan results on servers it's highly recommended to run the scan with root privileges.
 
-The `--sudo` option allows to run octoscan on Linux Servers under a non-privileged account 
-if certain sudo rules allow password free access the following commands:
+### Linux Java Filesystem Scan
+On Linux, octoscan scans common installation filesystem paths for java versions. 
+If you have own conventions for installing software, specify the -J / --java option.
+Paths that do not exist or are not accessible are silently ignored.
+For best java scan results on servers it's highly recommended to run the scan with root privileges.
 
 ```bash
-cat /sys/class/dmi/id/*              
-cat /proc/*/environ
+octoscan -java "/app/java:/u00/myapp/lib"
 ```
-
-To use this feature you must have centralized maintenance mechanisms for /etc/sudoers in place. 
 
 ### Python Version
 

@@ -9,23 +9,22 @@ from __future__ import print_function
 from optparse import OptionParser
 from uuid import uuid1
 
-from lib.octoscan import OctoscanArchive
+from lib.octoscan_archive import OctoscanArchive
 
 
 def scan_platform(scan, options):
     if scan.is_windows():
-        from lib.windows import scan_windows
+        from lib.scan_windows import scan_windows
         scan_windows(scan, options)
     elif scan.is_darwin():
-        from lib.darwin import scan_darwin
+        from lib.scan_darwin import scan_darwin
         scan_darwin(scan, options)
     elif scan.is_linux():
-        from lib.linux import scan_linux
+        from lib.scan_linux import scan_linux
         scan_linux(scan, options)
 
 
 def main():
-
     parser = OptionParser()
 
     parser.add_option("-o", "--outputfolder", dest="output_folder",
@@ -41,6 +40,12 @@ def main():
                       action="store_true",
                       help="use sudo to access protected resources, sudoers has to allow no password access")
 
+    parser.add_option("-J", "--java", dest="java_locations", default="",
+                      help="Linux: list of additional folders for java filesystem scan, separated by columns")
+
+    parser.add_option("--debugthrow", dest="debugthrow", action='store_true', default=False,
+                      help="do throw critical exceptions (for debugging only)")
+
     (options, args) = parser.parse_args()
 
     with OctoscanArchive(output_folder=options.output_folder,
@@ -54,8 +59,9 @@ def main():
         try:
             scan_platform(scan, options)
         except Exception as e:
-            # noinspection PyProtectedMember
             scan.queue_warning(9001, "Exception: " + repr(e))
+            if options.debugthrow:
+                raise
 
 
 if __name__ == '__main__':
