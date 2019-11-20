@@ -24,6 +24,12 @@ FILE=$(./octoscan.pyz -o /tmp)
 The program emits the generated filename to stdout, use the variable `${FILE}` to further process the file. 
 You are completely free on how to transfer the generated files to the OctoSAM Import Service import folder.
 
+A list of all options can be obtained using the help option
+
+```bash
+./octoscan.pyz --help
+```
+
 #### Using [octo-collect](https://github.com/octosoft/octopus-resty) the Octosoft Web-based Upload Server
 
 Octosoft provides a high-performance upload server based on [openresty](https://openresty.org).
@@ -40,8 +46,8 @@ fi
 ```
 
 ### Linux Java Process Scan
-On Linux, octoscan performs an in-depth scan of running java processes. If run under root or if the -sudo option
-is set the scan will read all java processes. Otherwise it reads processes running under the same user as the scan only.
+On Linux, octoscan performs an in-depth scan of running java processes. If run under root 
+the scan will read all java processes. Otherwise it reads processes running under the same user as the scan only.
 If not running under root, the scan user must have permissions to start all detected java binaries.
 For best java scan results on servers it's highly recommended to run the scan with root privileges.
 
@@ -92,3 +98,5 @@ The source code of the macOS/Linux scanner is licensed under the MIT open source
 
 For best results, all machines in your network should have synchronized clocks.
 Otherwise date and time information in the inventory can be unreliable.
+
+

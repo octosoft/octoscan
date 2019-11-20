@@ -91,7 +91,9 @@ def scan_linux_java(scan, options):
     # noinspection PyBroadException
     try:
         default_java = scan.check_output(["which", "java"])
-        scan.add_java_version(default_java.strip(), "java/static/default_java/version", features)
+        default_java = default_java.strip()
+        if len(default_java):
+            scan.add_java_version(default_java.strip(), "java/static/default_java/version", features)
     except Exception as e:
         pass
 
@@ -201,7 +203,9 @@ def scan_linux(scan, options):
         scan.add_file(os.path.join("/etc", release_info), os.path.join("release", release_info))
 
     for proc_file in ["cpuinfo", "meminfo", "scsi/scsi", "version", "version_signature"]:
-        scan.add_file(os.path.join("/proc", proc_file), os.path.join("proc/", proc_file))
+        f = os.path.join("/proc", proc_file)
+        if os.path.exists(f):
+            scan.add_file(f, os.path.join("proc/", proc_file))
 
     scan.add_folder("/sys/class/dmi/id", "sys/class/dmi/id")
 

@@ -129,13 +129,18 @@ class OctoscanArchive(object):
         """
         return self._is_linux
 
+    @staticmethod
+    def is_executable(path):
+        # type: (str) -> bool
+        return os.path.isfile(path) and os.access(path, os.X_OK)
+
     def check_output(self, *popenargs, **kwargs):
         r"""Run command with arguments and return its output as a byte string.
         Backported from Python 2.7 as it's implemented as pure python on stdlib.
         Python 2.6.2
         """
         self._verbose_trace("check_output " + str(popenargs))
-        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
+        process = subprocess.Popen(stdout=subprocess.PIPE, stderr=subprocess.PIPE, *popenargs, **kwargs)
         output, unused_err = process.communicate()
         retcode = process.poll()
         if retcode:
@@ -303,7 +308,17 @@ class OctoscanArchive(object):
         :param features:
         :return:
         """
-        self._verbose_trace("add_java_version:    " + path)
+
+        if not path:
+            return
+
+        if len(path) < 4:
+            return
+
+        if not OctoscanArchive.is_executable(path):
+            return
+
+        self._verbose_trace("add_java_version:    '" + path + "'")
 
         variant = "JRE"
 
@@ -351,12 +366,12 @@ class OctoscanArchive(object):
             if return_code == 0:
                 buf += version_str
             else:
-                msg = "java -version failed for " + path + ", exit code: " + str(return_code)
+                msg = "java -version failed for '" + path + "', exit code: " + str(return_code)
                 buf += "FAILED: " + msg
                 buf += version_str
                 self.queue_warning(2002, msg)
         except Exception as e:
-            msg = "java -version failed for " + path + ": " + str(e)
+            msg = "java -version failed for '" + path + "': " + str(e)
             buf += "FAILED: " + msg
             self.queue_warning(2003, msg)
 

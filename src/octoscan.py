@@ -10,6 +10,7 @@ from optparse import OptionParser
 from uuid import uuid1
 
 from lib.octoscan_archive import OctoscanArchive
+from lib.octoscan_build import octoscan_build
 
 
 def scan_platform(scan, options):
@@ -30,12 +31,15 @@ def main():
     parser.add_option("-o", "--outputfolder", dest="output_folder",
                       default=".",
                       help="write output file to specified directory")
+
     parser.add_option("-v", "--verbose",
                       action="store_true", dest="verbose", default=False,
                       help="verbose output")
+
     parser.add_option("-u", "--uuid", dest="uuid",
                       help="specify unique id to use",
                       default=str(uuid1()))
+
     parser.add_option("-S", "--sudo", dest="sudo",
                       action="store_true",
                       help="use sudo to access protected resources, sudoers has to allow no password access")
@@ -46,7 +50,15 @@ def main():
     parser.add_option("--debugthrow", dest="debugthrow", action='store_true', default=False,
                       help="do throw critical exceptions (for debugging only)")
 
+    parser.add_option("--version", dest="version",
+                      action="store_true", default=False,
+                      help="print version information and exit")
+
     (options, args) = parser.parse_args()
+
+    if options.version:
+        print("OctoSAM octoscan " + octoscan_build)
+        exit(0)
 
     with OctoscanArchive(output_folder=options.output_folder,
                          uuid=options.uuid,
