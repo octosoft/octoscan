@@ -108,7 +108,8 @@ def scan_linux_java(scan, options):
     locations = [
         "/opt",
         "/usr/lib",
-        "/usr/java"
+        "/usr/lib64"
+        "/usr/java",
     ]
 
     if len(options.java_locations) > 0:
@@ -122,18 +123,23 @@ def scan_linux_java(scan, options):
         if os.path.exists(loc):
             find_command.append(loc)
 
-    # exclude /proc /sys /run /dev and non readable folders
+    # exclude /proc /sys /run /dev /etc and non readable folders
     # this is to make sure we do not recurse in there when the user specifies "/" to scan (not recommended anyway)
+    #
+    # a special case is when the java command is a link for example ibm java links the java command from bin/java to
+    # jre/bin/java. if we would only consider real files, we could not find the jdk installation with our trivial
 
     find_command.extend([
         "(", "-path", "/dev", "-o",
         "-path", "/proc", "-o",
         "-path", "/run", "-o",
         "-path", "/sys", "-o",
+        "-path", "/etc", "-o",
         "!", "-readable", ")",
         "-prune",
-        "-o", "-type", "f",
+        "-o", "(", "(", "-type", "f", "-o", "-type", "l", ")",
         "-executable", "-name", "java",
+        ")",
         "-print"
     ])
 
@@ -141,7 +147,7 @@ def scan_linux_java(scan, options):
     try:
         opt_java = scan.check_output(find_command)
         i = 0
-        for l in opt_java.strip().split('\n'):
+        for l in sorted(set(opt_java.strip().split('\n'))):
             i = i + 1
             scan.add_java_version(l.strip(), "java/static/opt_" + str(i) + "/version", features)
     except Exception as ex:
