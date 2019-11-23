@@ -12,7 +12,7 @@ On macOS the produced file has a .scam extension, on Linux .scal and on Windows 
 Typically the scanner is invoked using existing management infrastructure.
 
 On workstations and client systems, it's highly recommended to start the scanner in the user's 
-context (logon scripts etc.) as that gives you valuable device affinity information. 
+context (logon scripts, macOS Launch Agents etc.) as that gives you valuable device affinity information. 
 
 On servers, the scanner should be started in the root context, otherwise scanned information
 may be incomplete.
