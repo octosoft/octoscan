@@ -268,8 +268,6 @@ def scan_linux(scan, options):
         params = read_hyperv_parameters3()
     else:
         params = read_hyperv_parameters()
-
-    params = read_hyperv_parameters()
     if len(params):
         hyper_elem = scan.create_element("hypervisor")
         scan.append_info_element(hyper_elem, "Type", "S", "Hyper-V")
