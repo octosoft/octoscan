@@ -6,6 +6,7 @@
 from __future__ import print_function
 
 import os
+import sys
 import platform
 import glob
 
@@ -15,7 +16,32 @@ if 'linux' in platform.system().lower():
 
 
 # noinspection PyCompatibility
+def read_hyperv_parameters3():
+    """read hyperv kvp parameters - python3 version"""
+    kvp_file = "/var/lib/hyperv/.kvp_pool_3"
+    params = {}
+    if os.path.exists(kvp_file):
+        strip = ' \r\n\t\0'
+        with open(kvp_file, "rb") as f:
+            # noinspection PyArgumentList
+            key = str(f.read(512), 'utf-8').rstrip(strip)
+            # noinspection PyArgumentList
+            val = str(f.read(2048), 'utf-8').rstrip(strip)
+            if len(key):
+                params[key] = val
+            while len(val):
+                # noinspection PyArgumentList
+                key = str(f.read(512), 'utf-8').rstrip(strip)
+                # noinspection PyArgumentList
+                val = str(f.read(2048), 'utf-8').rstrip(strip)
+                if len(key):
+                    params[key] = val
+    return params
+
+
+# noinspection PyCompatibility
 def read_hyperv_parameters():
+    """read hyperv kvp parameters - python3 version"""
     kvp_file = "/var/lib/hyperv/.kvp_pool_3"
     params = {}
     if os.path.exists(kvp_file):
@@ -147,9 +173,9 @@ def scan_linux_java(scan, options):
     try:
         opt_java = scan.check_output(find_command)
         i = 0
-        for l in sorted(set(opt_java.strip().split('\n'))):
+        for line in sorted(set(opt_java.strip().split('\n'))):
             i = i + 1
-            scan.add_java_version(l.strip(), "java/static/opt_" + str(i) + "/version", features)
+            scan.add_java_version(line.strip(), "java/static/opt_" + str(i) + "/version", features)
     except Exception as ex:
         pass
 
@@ -159,8 +185,8 @@ def scan_linux_java(scan, options):
         user = os.getlogin()
         output = scan.check_output(["ps", "-u", user, "-o", "pid,comm"])
 
-    for l in output.split('\n'):
-        token = l.strip().split(' ')
+    for line in output.split('\n'):
+        token = line.strip().split(' ')
         if len(token) > 1:
             pid = token[0]
             cmd = token[1].lower()
@@ -235,6 +261,13 @@ def scan_linux(scan, options):
     # TODO: test/debug on SLES11
     # scan.add_command_output(["service", "--status-all"], "cmd/service_status_all")
     scan.add_command_output(["systemctl", "list-units", "-all", "--no-page"], "cmd/systemctl_units_all")
+
+    params = {}
+
+    if sys.version_info >= (3, 0):
+        params = read_hyperv_parameters3()
+    else:
+        params = read_hyperv_parameters()
 
     params = read_hyperv_parameters()
     if len(params):
