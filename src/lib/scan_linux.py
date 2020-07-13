@@ -33,9 +33,13 @@ def read_hyperv_parameters3():
                 # noinspection PyArgumentList
                 key = str(f.read(512), 'utf-8').rstrip(strip)
                 # noinspection PyArgumentList
-                val = str(f.read(2048), 'utf-8').rstrip(strip)
-                if len(key):
-                    params[key] = val
+                try:
+                    val = str(f.read(2048), 'utf-8').rstrip(strip)
+                    if len(key):
+                        params[key] = val
+                except UnicodeDecodeError:
+                    params[key] = "ERROR"
+
     return params
 
 
@@ -256,6 +260,7 @@ def scan_linux(scan, options):
                                 "rpm/installed.txt")
 
     scan.add_command_output(["ip", "addr"], "cmd/ip_addr")
+    scan.add_command_output(["ip", "route"], "cmd/ip_route")
     scan.add_command_output(["ps", "-ef"], "cmd/ps_ef")
     scan.add_command_output(["hostnamectl", "status"], "cmd/hostnamectl")
     # TODO: test/debug on SLES11
