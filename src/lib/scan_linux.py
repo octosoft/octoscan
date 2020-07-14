@@ -15,32 +15,52 @@ if 'linux' in platform.system().lower():
     import pwd
 
 
+#
+# legacy read parameters from kvp files
+# parsing these files is error prone and code differs slightly from python2 to python3
+# this is left for backward compatibility only.
+# ImportService after 1.9.11 should do the parsing during import
+#
+
+# noinspection PyCompatibility
+def get_val3(f, length):
+    buf = f.read(length)
+    pos = buf.find(b'\x00')
+    # noinspection PyArgumentList
+    return str(buf[0:pos], 'utf-8')
+
+
 # noinspection PyCompatibility
 def read_hyperv_parameters3():
     """read hyperv kvp parameters - python3 version"""
     kvp_file = "/var/lib/hyperv/.kvp_pool_3"
     params = {}
     if os.path.exists(kvp_file):
-        strip = ' \r\n\t\0'
         with open(kvp_file, "rb") as f:
             # noinspection PyArgumentList
-            key = str(f.read(512), 'utf-8').rstrip(strip)
+            key = get_val3(f, 512)
             # noinspection PyArgumentList
-            val = str(f.read(2048), 'utf-8').rstrip(strip)
+            val = get_val3(f, 2048)
             if len(key):
                 params[key] = val
+
             while len(val):
                 # noinspection PyArgumentList
-                key = str(f.read(512), 'utf-8').rstrip(strip)
+                key = get_val3(f, 512)
                 # noinspection PyArgumentList
                 try:
-                    val = str(f.read(2048), 'utf-8').rstrip(strip)
+                    val = get_val3(f, 512)
                     if len(key):
                         params[key] = val
                 except UnicodeDecodeError:
                     params[key] = "ERROR"
-
     return params
+
+
+def get_val(f, length):
+    buf = f.read(length)
+    pos = buf.find('\x00')
+    return str(buf[0:pos])
 
 
 # noinspection PyCompatibility
@@ -49,15 +69,14 @@ def read_hyperv_parameters():
     kvp_file = "/var/lib/hyperv/.kvp_pool_3"
     params = {}
     if os.path.exists(kvp_file):
-        strip = ' \r\n\t\0'
         with open(kvp_file, "rb") as f:
-            key = str(f.read(512)).rstrip(strip)
-            val = str(f.read(2048)).rstrip(strip)
+            key = get_val(f, 512)
+            val = get_val(f, 2048)
             if len(key):
                 params[key] = val
             while len(val):
-                key = str(f.read(512)).rstrip(strip)
-                val = str(f.read(2048)).rstrip(strip)
+                key = get_val(f, 512)
+                val = get_val(f, 2048)
                 if len(key):
                     params[key] = val
     return params
@@ -266,6 +285,14 @@ def scan_linux(scan, options):
     # TODO: test/debug on SLES11
     # scan.add_command_output(["service", "--status-all"], "cmd/service_status_all")
     scan.add_command_output(["systemctl", "list-units", "-all", "--no-page"], "cmd/systemctl_units_all")
+
+    # modern: just copy hyperv kvp files
+    kvp_folder = "/var/lib/hyperv"
+
+    if os.path.exists(kvp_folder):
+        scan.add_folder2(kvp_folder, "hyperv")
+
+    # legacy (OctoSAM 1.9.10) parse the file into a dictionary
 
     params = {}
 

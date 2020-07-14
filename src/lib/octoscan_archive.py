@@ -262,6 +262,39 @@ class OctoscanArchive(object):
             if os.path.isfile(os.path.join(path, f)):
                 self.add_file(os.path.join(path, f), os.path.join(name, f))
 
+    def add_file2(self, path, name):
+        # type: (str,str) -> None
+        """
+        adds a binary file directly to the zip archive without going through byte
+        to string conversions and encodings. delegates decoding and parsing to the import service
+        :param path:
+        :param name:
+        :return:
+        """
+        if not os.path.exists(path):
+            self.queue_warning(1001, "add_file2 cannot read '" + path + "': file does not exist")
+            return
+        try:
+            self.zip.write(path, self.uuid + "/" + name)
+        except IOError as e:
+            self.queue_warning(1002, "add_file2 cannot read " + path + ": " + repr(e))
+        except Exception as e:
+            self.queue_warning(1003, "add_file2 cannot read " + path + ": " + repr(e))
+
+    def add_folder2(self, path, name):
+        # type: (str,str) -> None
+        """
+        adds all files in the specified folder binary to the zip archive without going through byte
+        to string conversions and encodings. delegates decoding and parsing to the import service
+        :param path:
+        :param name:
+        :return:
+        """
+        self._verbose_trace("add_folder2: " + path)
+        for f in os.listdir(path):
+            if os.path.isfile(os.path.join(path, f)):
+                self.add_file2(os.path.join(path, f), os.path.join(name, f))
+
     @staticmethod
     def command_exists(cmd):
         # type: (str) -> bool
