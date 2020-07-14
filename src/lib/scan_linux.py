@@ -49,7 +49,7 @@ def read_hyperv_parameters3():
                 key = get_val3(f, 512)
                 # noinspection PyArgumentList
                 try:
-                    val = get_val3(f, 512)
+                    val = get_val3(f, 2048)
                     if len(key):
                         params[key] = val
                 except UnicodeDecodeError:
