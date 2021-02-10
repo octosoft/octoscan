@@ -15,6 +15,17 @@ if 'linux' in platform.system().lower():
     import pwd
 
 
+# python 3.8 - have to use distro module
+using_distro = False
+
+try:
+    # noinspection PyUnresolvedReferences
+    import distro
+    using_distro = True
+except ImportError:
+    pass
+
+
 #
 # legacy read parameters from kvp files
 # parsing these files is error prone and code differs slightly from python2 to python3
@@ -234,7 +245,16 @@ def scan_linux(scan, options):
     """
     # deprecated in python 3.8 -> distro package
     # noinspection PyDeprecation
-    (distribution, version, distribution_id) = platform.linux_distribution()
+
+    distribution = ""
+    version = ""
+    distribution_id = ""
+
+    if using_distro:
+        (distribution, version, distribution_id) = distro.linux_distribution()
+    else:
+        # noinspection PyUnresolvedReferences
+        (distribution, version, distribution_id) = platform.linux_distribution()
 
     try:
         scan_linux_user(scan, options)
@@ -242,6 +262,7 @@ def scan_linux(scan, options):
         scan.queue_warning(2001, "scan_linux_user failed:" + repr(e))
 
     os_elem = scan.create_element("operating_system")
+    scan.append_info_element(os_elem, "using_python_distro_module", "B", str(using_distro).lower())
     scan.append_info_element(os_elem, "distribution", "S", distribution)
     scan.append_info_element(os_elem, "version", "S", version)
     scan.append_info_element(os_elem, "id", "S", distribution_id)
