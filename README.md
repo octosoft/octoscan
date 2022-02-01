@@ -2,6 +2,11 @@
 
 ## Unified Linux and macOS Scanner for [OctoSAM Inventory](https://www.octosoft.ch)
 
+
+| :exclamation:  macOS 12.3 beta is currently not supported, due to the fact that Apple no longer distributes python with the OS   |
+|-----------------------------------------|
+
+
 ## Basic Operation
 
 The scan module for Linux and macOS is a Python script delivered as a Python archive (.pyz)
