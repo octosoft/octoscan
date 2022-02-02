@@ -3,7 +3,7 @@
 ## Unified Linux and macOS Scanner for [OctoSAM Inventory](https://www.octosoft.ch)
 
 
-| :exclamation:  macOS 12.3 beta is currently not supported, due to the fact that Apple no longer distributes python with the OS   |
+| :exclamation:  macOS 12.3 beta is currently not supported, due to the fact that Apple no longer distributes python with the OS see new [shell based scanner](https://github.com/octosoft/octoscan-mac)  |
 |-----------------------------------------|
 
 
