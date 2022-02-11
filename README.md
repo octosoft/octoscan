@@ -63,7 +63,7 @@ Paths that do not exist or are not accessible are silently ignored.
 For best java scan results on servers it's highly recommended to run the scan with root privileges.
 
 ```bash
-octoscan -java "/app/java:/u00/myapp/lib"
+octoscan.pyz -java "/app/java:/u00/myapp/lib"
 ```
 
 ### Python Version
