@@ -3,13 +3,13 @@
 ## Unified Linux and macOS Scanner for [OctoSAM Inventory](https://www.octosoft.ch)
 
 
-| :exclamation:  macOS 12.3 beta is not supported, due to the fact that Apple no longer distributes python with the OS see new [shell based scanner](https://github.com/octosoft/octoscan-mac)  |
+| :exclamation:  macOS 12.3 is not supported, due to the fact that Apple no longer distributes python with the OS see new [shell based scanner](https://github.com/octosoft/octoscan-mac)  |
 |-----------------------------------------|
 
 
 ## Basic Operation
 
-The scan module for Linux and macOS is a Python script delivered as a Python archive (.pyz)
+The scan module for Linux and macOS (versions earlier than 12.3) is a Python script delivered as a Python archive (.pyz)
 On macOS the produced file has a .scam extension, on Linux .scal and on Windows .zip
 
 ### Invocation and Collection of Generated Files
