@@ -87,7 +87,7 @@ sudo apt-get install python-minimal
 ```
 
 ### Running on macOS
-Starting with macOS 12.3, Apple will no longer support Python as a standard installation.
+Starting with macOS Monterey 12.3, Apple will no longer support Python as a standard installation.
 Please migrate your macOS environment to the [new shell based scanner](https://github.com/octosoft/octoscan-mac).
 Users of the notarized mac package please enquire for an updated package.
 
