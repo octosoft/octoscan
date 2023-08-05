@@ -1,5 +1,5 @@
 #
-# (c)2019 Octosoft AG, CH-6312 Steinhausen, Switzerland
+# (c)2019-2023 Octosoft AG, CH-6312 Steinhausen, Switzerland
 # This code is licensed under the MIT license see LICENSE.txt
 #
 
@@ -38,23 +38,15 @@ class OctoscanArchive(object):
         else:
             self.uuid = str(uuid1())
 
-        # if not os.path.exists(output_folder):
-        #    self._eprint("output folder '"+output_folder + "' does not exist")
-        #    exit(2)
-
         # are we on windows (module tests?)
 
         platform_system = platform.system().lower()
 
         self._is_windows = "windows" in platform_system
-        self._is_darwin = "darwin" in platform_system
         self._is_linux = "linux" in platform_system
 
         if self.is_windows():
             ext = ".zip"
-
-        if self.is_darwin():
-            ext = ".scam"
 
         if not os.path.exists(output_folder):
             self._eprint("IOError: " + output_folder + ": no such file or directory")
@@ -115,13 +107,6 @@ class OctoscanArchive(object):
         """
         return self._is_windows
 
-    def is_darwin(self):
-        # type: () -> bool
-        """
-        :return: True if the scanner is running on darwin
-        """
-        return self._is_darwin
-
     def is_linux(self):
         # type: () -> bool
         """
@@ -133,28 +118,6 @@ class OctoscanArchive(object):
     def is_executable(path):
         # type: (str) -> bool
         return os.path.isfile(path) and os.access(path, os.X_OK)
-
-    def check_output(self, *popenargs, **kwargs):
-        r"""Run command with arguments and return its output as a byte string.
-        Backported from Python 2.7 as it's implemented as pure python on stdlib.
-        Python 2.6.2
-        """
-        self._verbose_trace("check_output " + str(popenargs))
-        process = subprocess.Popen(stdout=subprocess.PIPE, stderr=subprocess.PIPE, *popenargs, **kwargs)
-        output, unused_err = process.communicate()
-        retcode = process.poll()
-        if retcode:
-            cmd = kwargs.get("args")
-            if cmd is None:
-                cmd = popenargs[0]
-            error = subprocess.CalledProcessError(retcode, cmd)
-            error.output = output
-            raise error
-
-        if sys.version_info >= (3, 0):
-            return output.decode()
-
-        return output
 
     def readlink(self, link):
         # type: (str) -> str
@@ -326,7 +289,7 @@ class OctoscanArchive(object):
         try:
             if self.command_exists(cmd[0]):
                 self._verbose_trace("add_command_output:  " + str(cmd))
-                output = self.check_output(cmd)
+                output = subprocess.check_output(cmd).decode(encoding='utf-8')
                 self.add_str(output, name)
             else:
                 self._verbose_trace("add_command_output:  " + str(cmd) + ": command not found")

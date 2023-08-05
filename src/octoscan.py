@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 #
-# (c) 2019 Octosoft AG, CH-6312 Steinhausen, Switzerland
+# (c) 2019-2023 Octosoft AG, CH-6312 Steinhausen, Switzerland
 # This software is provided under the MIT License, see LICENSE.txt
 #
 
 from __future__ import print_function
+
+import sys
 
 from optparse import OptionParser
 from uuid import uuid1
@@ -17,15 +19,22 @@ def scan_platform(scan, options):
     if scan.is_windows():
         from lib.scan_windows import scan_windows
         scan_windows(scan, options)
-    elif scan.is_darwin():
-        from lib.scan_darwin import scan_darwin
-        scan_darwin(scan, options)
     elif scan.is_linux():
         from lib.scan_linux import scan_linux
         scan_linux(scan, options)
 
 
 def main():
+
+    # guard against execution on python 2.6 - no longer supported
+
+    if sys.version_info[0] == 2 and not sys.version_info[1] == 7:
+        raise Exception("Unsupported Python2 Version: " + repr(sys.version_info))
+
+    # guard against execution on python 3.6 or lower - no longer supported
+    if sys.version_info[0] == 3 and sys.version_info[1] < 7:
+        raise Exception("Unsupported Python3 Version: " + repr(sys.version_info))
+
     parser = OptionParser()
 
     parser.add_option("-o", "--outputfolder", dest="output_folder",

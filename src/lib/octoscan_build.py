@@ -1,2 +1,2 @@
-﻿# generated - do not edit
-octoscan_build = '1.10.0 2021-02-10 14:12'
+# generated - do not edit
+octoscan_build = '1.10.6.21 2023-08-05'

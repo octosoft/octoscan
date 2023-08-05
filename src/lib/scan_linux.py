@@ -1,19 +1,18 @@
 #
-# (c)2019 Octosoft AG, CH-6312 Steinhausen, Switzerland
+# (c)2019-2023 Octosoft AG, CH-6312 Steinhausen, Switzerland
 # This code is licensed under the MIT license see LICENSE.txt
 #
 
 from __future__ import print_function
 
 import os
-import sys
 import platform
 import glob
+import subprocess
 
 if 'linux' in platform.system().lower():
     # noinspection PyUnresolvedReferences
     import pwd
-
 
 # python 3.8 - have to use distro module
 using_distro = False
@@ -21,76 +20,10 @@ using_distro = False
 try:
     # noinspection PyUnresolvedReferences
     import distro
+
     using_distro = True
 except ImportError:
     pass
-
-
-#
-# legacy read parameters from kvp files
-# parsing these files is error prone and code differs slightly from python2 to python3
-# this is left for backward compatibility only.
-# ImportService after 1.9.11 should do the parsing during import
-#
-
-# noinspection PyCompatibility
-def get_val3(f, length):
-    buf = f.read(length)
-    pos = buf.find(b'\x00')
-    # noinspection PyArgumentList
-    return str(buf[0:pos], 'utf-8')
-
-
-# noinspection PyCompatibility
-def read_hyperv_parameters3():
-    """read hyperv kvp parameters - python3 version"""
-    kvp_file = "/var/lib/hyperv/.kvp_pool_3"
-    params = {}
-    if os.path.exists(kvp_file):
-        with open(kvp_file, "rb") as f:
-            # noinspection PyArgumentList
-            key = get_val3(f, 512)
-            # noinspection PyArgumentList
-            val = get_val3(f, 2048)
-            if len(key):
-                params[key] = val
-
-            while len(val):
-                # noinspection PyArgumentList
-                key = get_val3(f, 512)
-                # noinspection PyArgumentList
-                try:
-                    val = get_val3(f, 2048)
-                    if len(key):
-                        params[key] = val
-                except UnicodeDecodeError:
-                    params[key] = "ERROR"
-    return params
-
-
-def get_val(f, length):
-    buf = f.read(length)
-    pos = buf.find('\x00')
-    return str(buf[0:pos])
-
-
-# noinspection PyCompatibility
-def read_hyperv_parameters():
-    """read hyperv kvp parameters - python3 version"""
-    kvp_file = "/var/lib/hyperv/.kvp_pool_3"
-    params = {}
-    if os.path.exists(kvp_file):
-        with open(kvp_file, "rb") as f:
-            key = get_val(f, 512)
-            val = get_val(f, 2048)
-            if len(key):
-                params[key] = val
-            while len(val):
-                key = get_val(f, 512)
-                val = get_val(f, 2048)
-                if len(key):
-                    params[key] = val
-    return params
 
 
 # noinspection PyUnusedLocal
@@ -205,7 +138,7 @@ def scan_linux_java(scan, options):
 
     # noinspection PyBroadException
     try:
-        opt_java = scan.check_output(find_command)
+        opt_java = subprocess.check_output(find_command).decode(encoding='utf-8')
         i = 0
         for line in sorted(set(opt_java.strip().split('\n'))):
             i = i + 1
@@ -214,10 +147,10 @@ def scan_linux_java(scan, options):
         pass
 
     if os.geteuid() == 0 or options.sudo:
-        output = scan.check_output(["ps", "-e", "-o", "pid,comm"])
+        output = subprocess.check_output(["ps", "-e", "-o", "pid,comm"]).decode(encoding='utf-8')
     else:
         user = os.getlogin()
-        output = scan.check_output(["ps", "-u", user, "-o", "pid,comm"])
+        output = subprocess.check_output(["ps", "-u", user, "-o", "pid,comm"]).decode(encoding='utf-8')
 
     for line in output.split('\n'):
         token = line.strip().split(' ')
@@ -283,7 +216,16 @@ def scan_linux(scan, options):
         if os.path.exists(f):
             scan.add_file(f, os.path.join("proc/", proc_file))
 
+    #
+    # try to get hardware ids of the system
+    #
+    # both variants do not return the system_uuid when we are not root
+    # this uuid could be used for vm to host mapping for virtual machines under vmware
+    # it's recommended to run the server scan under root
+    #
     scan.add_folder("/sys/class/dmi/id", "sys/class/dmi/id")
+    if scan.command_exists("udevadm"):
+        scan.add_command_output(["udevadm", "info", "-a", "/sys/class/dmi/id"], "cmd/udevadm_dmi_id")
 
     for oratab in ["/etc/oratab", "/var/opt/oracle/oratab"]:
         if os.path.exists(oratab):
@@ -295,15 +237,16 @@ def scan_linux(scan, options):
                                  '${Package}\t${Version}\t${Architecture}\t${binary:Summary}\n'],
                                 "dpkg/installed.txt")
     else:
-        scan.add_command_output(["rpm", "-qa", "--queryformat",
-                                 '%{name}\t%{version}\t%{release}\t%{arch}\t%{summary}\t%{installtime}\n'],
-                                "rpm/installed.txt")
+
+        fmt = '%{name}\t%{version}\t%{release}\t%{arch}\t%{summary}\t%{installtime}\t%{vendor}\t%{packager}\n'
+
+        scan.add_command_output(["rpm", "-qa", "--queryformat", fmt], "rpm/installed.txt")
 
     scan.add_command_output(["ip", "addr"], "cmd/ip_addr")
     scan.add_command_output(["ip", "route"], "cmd/ip_route")
     scan.add_command_output(["ps", "-ef"], "cmd/ps_ef")
     scan.add_command_output(["hostnamectl", "status"], "cmd/hostnamectl")
-    # TODO: test/debug on SLES11
+
     # scan.add_command_output(["service", "--status-all"], "cmd/service_status_all")
     scan.add_command_output(["systemctl", "list-units", "-all", "--no-page"], "cmd/systemctl_units_all")
 
@@ -312,21 +255,6 @@ def scan_linux(scan, options):
 
     if os.path.exists(kvp_folder):
         scan.add_folder2(kvp_folder, "hyperv")
-
-    # legacy (OctoSAM 1.9.10) parse the file into a dictionary
-
-    params = {}
-
-    if sys.version_info >= (3, 0):
-        params = read_hyperv_parameters3()
-    else:
-        params = read_hyperv_parameters()
-    if len(params):
-        hyper_elem = scan.create_element("hypervisor")
-        scan.append_info_element(hyper_elem, "Type", "S", "Hyper-V")
-        for k in params.keys():
-            scan.append_info_element(hyper_elem, k, "S", params[k])
-        scan.append_child(hyper_elem)
 
     scan_linux_memory_size(scan, options)
 
