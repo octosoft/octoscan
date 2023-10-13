@@ -289,7 +289,12 @@ class OctoscanArchive(object):
         try:
             if self.command_exists(cmd[0]):
                 self._verbose_trace("add_command_output:  " + str(cmd))
-                output = subprocess.check_output(cmd).decode(encoding='utf-8')
+
+                if sys.version_info >= (3, 0):
+                    output = subprocess.check_output(cmd).decode(encoding='utf-8')
+                else:
+                    output = str(subprocess.check_output(cmd))
+
                 self.add_str(output, name)
             else:
                 self._verbose_trace("add_command_output:  " + str(cmd) + ": command not found")
