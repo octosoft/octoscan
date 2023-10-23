@@ -4,7 +4,7 @@
 
 Release 1.10.6 - September 2023
 
-**_NOTE:_** python 2.6 is no longer supported, minimum version is now python 2.7 or python 3.7
+**_NOTE:_** python 2.6 is no longer supported, minimum version is now python 2.7 or python 3.6
 
 **_NOTE:_** macOS support has been removed from this version of the python based scanner.
    Apple does no longer distribute python with the base operating system.

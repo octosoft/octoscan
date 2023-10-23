@@ -31,8 +31,9 @@ def main():
     if sys.version_info[0] == 2 and not sys.version_info[1] == 7:
         raise Exception("Unsupported Python2 Version: " + repr(sys.version_info))
 
-    # guard against execution on python 3.6 or lower - no longer supported
-    if sys.version_info[0] == 3 and sys.version_info[1] < 7:
+    # guard against execution on python 3.5 or lower - no longer supported
+    # SLES 15 requires python 3.6 !!
+    if sys.version_info[0] == 3 and sys.version_info[1] < 6:
         raise Exception("Unsupported Python3 Version: " + repr(sys.version_info))
 
     parser = OptionParser()
