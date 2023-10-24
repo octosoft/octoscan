@@ -1,6 +1,6 @@
 # octoscan
 
-## Linux Scanner for [OctoSAM Inventory](https://www.octosoft.ch)
+## Linux scanner for [OctoSAM Inventory](https://www.octosoft.ch)
 
 Release 1.10.6 - September 2023
 
@@ -13,13 +13,42 @@ Release 1.10.6 - September 2023
 produced .scal files. However, import of .scal files produced by older Linux scanners is
 still supported in OctoSAM Server 1.10.6.
 
-## Basic Operation
+## Basic operation
 
 The scan module for Linux is a Python script delivered as a Python archive (.pyz)
 The produced filename ends with .scal on Linux and .zip on Windows
 
+### Download octoscan from github
 
-### Invocation and Collection of Generated Files
+Download the current version of that is in the 'master' branch:
+
+Using curl
+
+```sh
+curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
+chmod +x octoscan.pyz
+```
+
+Using wget
+
+```sh
+wget https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
+chmod +x octoscan.pyz
+```
+
+Using git
+```sh
+mkdir project
+cd project
+git clone https://github.com/octosoft/octoscan
+```
+Git must be installed to do this. Usually the package to install is called 'git-core', install it
+using the package manager of your Linux flavor.
+Using git is the best option if you need to debug the scanner or are interested in the inner workings. 
+
+Alternatively you can download the release archive and extract octoscan.pyz from there.
+
+### Invocation and collection of generated Files
 
 Usually the scanner is invoked using existing management infrastructure.
 
@@ -42,7 +71,30 @@ A list of all options can be obtained using the help option
 ./octoscan.pyz --help
 ```
 
-### Using an Upload Server
+### Common error messages when starting the scanner
+
+```
+Unsupported Python2 Version:
+Unsupported Python3 Version:
+```
+Your system does not meet the minimum requirement of either Python 2.7 or 3.6 or newer.
+
+```
+-bash: ./octoscan.pyz: Permission denied
+```
+You probably forgot to set execution permissions on the file octoscan.pyz
+
+```
+/usr/bin/env 'python': No such file or directory
+```
+Your system does not have a python interpreter registered under the name python.
+Most likely you are on a more recent Linux system that has python3 as the default
+python environment. You need to start the scanner using the python3 command:
+```bash
+python3 octoscan.pyz
+```
+
+### Using an upload server
 
 Octosoft provides a Windows / IIS based upload server for the generated .scan files. A high-performance Linux based upload server is also provided based at [octo-collect](https://github.com/octosoft/octopus-resty), this open source server is based on [openresty](https://openresty.org).
 
@@ -61,14 +113,14 @@ fi
 In practice, you need to add error handling and ideally handle the case that the upload server may not
 be available by caching generated .scal files. 
 
-### Linux Java Process Scan
+### Linux Java process scan
 Octoscan performs an in-depth scan of running java processes. If run under root 
 the scan will read all java processes. Otherwise, it reads processes running under the same user as the scan only.
 If not running under root, the scan user must have permissions to start all detected java binaries 
 as detailed version information can typically only be read through the java binary --version option.
 For best java scan results on servers it's highly recommended to run the scan with root privileges.
 
-### Linux Java Filesystem Scan
+### Linux Java filesystem scan
 Octoscan scans common installation filesystem paths for java versions. 
 If you have own conventions for installing software, specify the -J / --java option.
 Paths that do not exist or are not accessible are silently ignored.
@@ -81,7 +133,7 @@ octoscan.pyz -java "/app/java:/u00/myapp/lib"
 ### Python Version
 
 octoscan.pyz assumes that it is called using the current system implementation of python. 
-Currently this is python 2.7 or 3.7 on most systems. 
+Currently this is python 2.7 or 3.6 or newer on most systems. 
 If called directly it uses the python available using `/usr/bin/env python`.
 
 You can also call python explicitly:
@@ -99,7 +151,7 @@ sudo apt-get install python-minimal
 ```
 **_NOTE:_** Python 2.6 is no longer supported
 
-### Why is the Scanner dependent on Python
+### Why is the scanner dependent on python
 
 We decided that a single dependency on a python-minimal installation is easier to handle than the multiple dependencies 
 that we would have with a typical shell based scanner. 
@@ -114,15 +166,20 @@ Python programs are generally easier to maintain and debug than shell scripts.
 octoscan.pyz also runs under Windows for testing only. The produced .zip files cannot be imported into 
 OctoSAM Inventory.
 
-### Open File Format
+### Open file format
 
-The produced file is a zip archive that contains all information as clear text
+The produced file is a zip archive that contains all information as clear text.
+You can unzip the archive to see what got scanned.
 
-### Scanner Source License
+```bash
+unzip f74ecf32-38b7-4e24-9a7e-f262d7d5e26b.scal
+```
+
+### Scanner source license
 
 The source code of the Linux scanner is licensed under the MIT open source license. 
 
-### Network Prerequisites
+### Network prerequisites
 
 For best results, all machines in your network should have synchronized clocks.
 Otherwise date and time information in the inventory can be unreliable.
