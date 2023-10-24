@@ -20,7 +20,7 @@ The produced filename ends with .scal on Linux and .zip on Windows
 
 ### Download octoscan from github
 
-Download the current version of that is in the 'master' branch:
+Download the current version of octoscan that is in the 'master' branch:
 
 Using curl
 
@@ -48,7 +48,7 @@ Using git is the best option if you need to debug the scanner or are interested 
 
 Alternatively you can download the release archive and extract octoscan.pyz from there.
 
-### Invocation and collection of generated Files
+### Invocation and collection of generated files
 
 Usually the scanner is invoked using existing management infrastructure.
 
