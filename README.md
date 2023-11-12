@@ -18,9 +18,10 @@ still supported in OctoSAM Server 1.10.6.
 The scan module for Linux is a Python script delivered as a Python archive (.pyz)
 The produced filename ends with .scal on Linux and .zip on Windows
 
+
 ### Download octoscan from github
 
-Download the current version of octoscan that is in the 'master' branch:
+Download the current version of that is in the 'master' branch:
 
 Using curl
 
@@ -38,17 +39,17 @@ chmod +x octoscan.pyz
 
 Using git
 ```sh
-mkdir project
-cd project
+mkdir projects
+cd projects
 git clone https://github.com/octosoft/octoscan
 ```
-Git must be installed to do this. Usually the package to install is called 'git-core', install it
-using the package manager of your Linux flavor.
-Using git is the best option if you need to debug the scanner or are interested in the inner workings. 
+Git must be installed to do this. Usually the package to install is called 'git-core'. 
+Using git is the best option if you need to debug the scanner.
 
-Alternatively you can download the release archive and extract octoscan.pyz from there.
+Alternatively you can download the Release archive and extract octoscan.pyz from there.
 
-### Invocation and collection of generated files
+
+### Invocation and Collection of Generated Files
 
 Usually the scanner is invoked using existing management infrastructure.
 
@@ -142,13 +143,7 @@ You can also call python explicitly:
 python3 octoscan.pyz -o /tmp
 ```
 
-Some minimum debian and ubuntu installs do not include Python by default. 
-In that case you need to first install python-minimal.
 
-```bash
-sudo apt-get update
-sudo apt-get install python-minimal
-```
 **_NOTE:_** Python 2.6 is no longer supported
 
 ### Why is the scanner dependent on python
@@ -183,4 +178,68 @@ The source code of the Linux scanner is licensed under the MIT open source licen
 
 For best results, all machines in your network should have synchronized clocks.
 Otherwise date and time information in the inventory can be unreliable.
+
+### Notes for specific Linux variants
+
+The supported Linux variants are tested with their standard installs. 
+If you use a minimal install, some required modules may not be installed by default.
+
+#### RHEL 8, Centos 8, Rocky Linux 8 minimal install
+
+The python3 command may not be installed by default. The standard system python is python 3.6.
+
+```shell
+
+sudo yum update
+sudo yum install python3
+curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
+sudo python3 octoscan.pyz
+
+```
+
+#### RHEL 9, Centos 9, Rocky Linux 9 minimal install
+
+The python command is installed by default and points to python 3.9. 
+When using minimal installation variant, the python pip command and the 'distro' package may not be installed.
+
+```shell
+
+sudo yum update
+sudo yum install python-pip
+sudo pip install distro
+curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
+chmod +x octoscan.pyz
+sudo ./octoscan.pyz
+
+```
+
+#### Ubuntu minimal install 
+
+Some minimum ubuntu installs do not include Python by default. 
+In that case you need to first install python-minimal.
+
+```bash
+sudo apt-get update
+sudo apt-get install python-minimal
+url -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
+sudo python octoscan.pyz
+```
+
+#### Debian 12 minimal network install (with standard utilities)
+
+Debian 12 has python3 installed but lacks the distro module.
+Install the distro module into the system python3 installation
+
+```bash
+sudo apt install python3-distro
+wget https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
+sudo python3 ./octoscan.pyz
+```
+
+To analyze the generated .scal file you may want to install the unzip command too
+
+```bash
+sudo apt install unzip
+```
+
 
