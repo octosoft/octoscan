@@ -95,6 +95,28 @@ python environment. You need to start the scanner using the python3 command:
 python3 octoscan.pyz
 ```
 
+```
+AttributeError: module 'platform' has no attribute 'linux_distribution'
+```
+If your system python is 3.6 or newer, most likely your installation lacks the 'distro' module.
+The error message is a bit misleading, this will be fixed in a future update of the scanner.
+
+On some systems you can install the distro module using the your Linux package manager
+
+```shell
+sudo apt install python3-distro
+```
+```shell
+sudo yum install python-distro
+```
+Alternatively you can install pip first and then use pip to install the distro module
+
+```shell
+sudo yum install python-pip
+sudo pip install distro
+```
+
+
 ### Using an upload server
 
 Octosoft provides a Windows / IIS based upload server for the generated .scan files. A high-performance Linux based upload server is also provided based at [octo-collect](https://github.com/octosoft/octopus-resty), this open source server is based on [openresty](https://openresty.org).
