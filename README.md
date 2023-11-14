@@ -2,9 +2,9 @@
 
 ## [OctoSAM Inventory](https://www.octosoft.ch) scanner for Linux
 
-Release 1.10.7 - November 2023
-
 ### What's new
+
+#### Release 1.10.7 - November 2023
 
 Octoscan 1.10.7 no longer depends on the python distro module.
 On most Linux variants - even on minimal installs - the scanner should now be able to run directly
@@ -15,7 +15,7 @@ without the need to install any additional Linux packages or Python modules.
 
 Requires OctoSAM server version 1.10.6 or newer.
 
-Release 1.10.6 - September 2023
+#### Release 1.10.6 - September 2023
 
 **_NOTE:_** python 2.6 is no longer supported, minimum version is now python 2.7 or python 3.6
 
@@ -232,5 +232,5 @@ wget https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
 sudo python3 ./octoscan.pyz
 # optionally install curl:
 # sudo apt update
-# optional: sudo apt install curl
+# sudo apt install curl
 ```
