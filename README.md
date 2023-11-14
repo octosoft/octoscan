@@ -213,7 +213,7 @@ sudo ./octoscan.pyz
 
 Some minimum ubuntu installs do not include Python by default. 
 In that case you need to first install python-minimal.
-dppppppppppp 
+
 ```bash
 sudo apt-get update
 sudo apt-get install python-minimal
