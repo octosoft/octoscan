@@ -1,6 +1,19 @@
 # octoscan
 
-## Linux scanner for [OctoSAM Inventory](https://www.octosoft.ch)
+## [OctoSAM Inventory](https://www.octosoft.ch) scanner for Linux
+
+Release 1.10.7 - November 2023
+
+### What's new
+
+Octoscan 1.10.7 no longer depends on the python distro module.
+On most Linux variants - even on minimal installs - the scanner should now be able to run directly
+without the need to install any additional Linux packages or Python modules.
+
+**_NOTE_** windows support has been removed from octoscan. 
+    windows support was previously only used for module testing.
+
+Requires OctoSAM server version 1.10.6 or newer.
 
 Release 1.10.6 - September 2023
 
@@ -13,43 +26,42 @@ Release 1.10.6 - September 2023
 produced .scal files. However, import of .scal files produced by older Linux scanners is
 still supported in OctoSAM Server 1.10.6.
 
-## Basic operation
+## Installation and basic operation
 
-The scan module for Linux is a Python script delivered as a Python archive (.pyz)
-The produced filename ends with .scal on Linux and .zip on Windows
-
+The scan module for Linux is a Python script delivered as a Python archive.
 
 ### Download octoscan from github
 
-Download the current version of that is in the 'master' branch:
+Download the latest version from the github master branch. 
+Note that some distros provide curl while others provide wget by default. 
+For uploading the produced scan files we recommend
+that you install curl if it's not already installed.
 
-Using curl
+#### Download using curl
 
 ```sh
 curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
 chmod +x octoscan.pyz
 ```
 
-Using wget
+#### Download using wget
 
 ```sh
 wget https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
 chmod +x octoscan.pyz
 ```
 
-Using git
+#### Download using git
+
+This includes the source code of the scanner
+
 ```sh
 mkdir projects
 cd projects
 git clone https://github.com/octosoft/octoscan
 ```
-Git must be installed to do this. Usually the package to install is called 'git-core'. 
-Using git is the best option if you need to debug the scanner.
 
-Alternatively you can download the Release archive and extract octoscan.pyz from there.
-
-
-### Invocation and Collection of Generated Files
+### Invocation and collection of generated files
 
 Usually the scanner is invoked using existing management infrastructure.
 
@@ -94,28 +106,6 @@ python environment. You need to start the scanner using the python3 command:
 ```bash
 python3 octoscan.pyz
 ```
-
-```
-AttributeError: module 'platform' has no attribute 'linux_distribution'
-```
-If your system python is 3.6 or newer, most likely your installation lacks the 'distro' module.
-The error message is a bit misleading, this will be fixed in a future update of the scanner.
-
-On some systems you can install the distro module using the your Linux package manager
-
-```shell
-sudo apt install python3-distro
-```
-```shell
-sudo yum install python-distro
-```
-Alternatively you can install pip first and then use pip to install the distro module
-
-```shell
-sudo yum install python-pip
-sudo pip install distro
-```
-
 
 ### Using an upload server
 
@@ -165,9 +155,6 @@ You can also call python explicitly:
 python3 octoscan.pyz -o /tmp
 ```
 
-
-**_NOTE:_** Python 2.6 is no longer supported
-
 ### Why is the scanner dependent on python
 
 We decided that a single dependency on a python-minimal installation is easier to handle than the multiple dependencies 
@@ -175,13 +162,8 @@ that we would have with a typical shell based scanner.
 The situation is different on macOS, where we can assume certain command-line programs are installed on every machine. 
 
 Due to the diversity of Linux implementations, the Linux scanner is quite more complex than the macOS scanner.
-Python allows us to implement a complex scan without writing temporary files, this improves performance.
+Python allows us to implement a complex scan without writing temporary files, this improves performance considerably.
 Python programs are generally easier to maintain and debug than shell scripts.
-
-### Running on Windows
-
-octoscan.pyz also runs under Windows for testing only. The produced .zip files cannot be imported into 
-OctoSAM Inventory.
 
 ### Open file format
 
@@ -211,57 +193,44 @@ If you use a minimal install, some required modules may not be installed by defa
 The python3 command may not be installed by default. The standard system python is python 3.6.
 
 ```shell
-
 sudo yum update
 sudo yum install python3
 curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
 sudo python3 octoscan.pyz
-
 ```
 
 #### RHEL 9, Centos 9, Rocky Linux 9 minimal install
 
 The python command is installed by default and points to python 3.9. 
-When using minimal installation variant, the python pip command and the 'distro' package may not be installed.
 
 ```shell
-
-sudo yum update
-sudo yum install python-pip
-sudo pip install distro
 curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
 chmod +x octoscan.pyz
 sudo ./octoscan.pyz
-
 ```
 
 #### Ubuntu minimal install 
 
 Some minimum ubuntu installs do not include Python by default. 
 In that case you need to first install python-minimal.
-
+dppppppppppp 
 ```bash
 sudo apt-get update
 sudo apt-get install python-minimal
-url -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
+curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
 sudo python octoscan.pyz
 ```
 
 #### Debian 12 minimal network install (with standard utilities)
 
-Debian 12 has python3 installed but lacks the distro module.
-Install the distro module into the system python3 installation
+The python command is installed and points to Python 3.10.
+Note that curl may not be installed by default. We recommend to use curl to upload the generated .scan files to the
+OctoSAM upload server.
 
 ```bash
-sudo apt install python3-distro
 wget https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
 sudo python3 ./octoscan.pyz
+# optionally install curl:
+# sudo apt update
+# optional: sudo apt install curl
 ```
-
-To analyze the generated .scal file you may want to install the unzip command too
-
-```bash
-sudo apt install unzip
-```
-
-

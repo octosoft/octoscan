@@ -13,19 +13,10 @@ from uuid import uuid1
 
 from lib.octoscan_archive import OctoscanArchive
 from lib.octoscan_build import octoscan_build
-
-
-def scan_platform(scan, options):
-    if scan.is_windows():
-        from lib.scan_windows import scan_windows
-        scan_windows(scan, options)
-    elif scan.is_linux():
-        from lib.scan_linux import scan_linux
-        scan_linux(scan, options)
+from lib.scan_linux import scan_linux
 
 
 def main():
-
     # guard against execution on python 2.6 - no longer supported
 
     if sys.version_info[0] == 2 and not sys.version_info[1] == 7:
@@ -79,7 +70,8 @@ def main():
         print(scan.filename)
 
         try:
-            scan_platform(scan, options)
+            scan_linux(scan, options)
+
         except Exception as e:
             scan.queue_warning(9001, "Exception: " + repr(e))
             if options.debugthrow:

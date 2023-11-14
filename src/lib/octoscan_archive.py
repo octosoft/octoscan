@@ -7,8 +7,8 @@ from __future__ import print_function
 
 import sys
 import os
-import platform
 import subprocess
+import platform
 
 from datetime import datetime
 from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
@@ -37,16 +37,6 @@ class OctoscanArchive(object):
             self.uuid = uuid
         else:
             self.uuid = str(uuid1())
-
-        # are we on windows (module tests?)
-
-        platform_system = platform.system().lower()
-
-        self._is_windows = "windows" in platform_system
-        self._is_linux = "linux" in platform_system
-
-        if self.is_windows():
-            ext = ".zip"
 
         if not os.path.exists(output_folder):
             self._eprint("IOError: " + output_folder + ": no such file or directory")
@@ -77,7 +67,7 @@ class OctoscanArchive(object):
         self._octoscan_element.setAttribute("uuid", self.uuid)
         self._octoscan_element.setAttribute("python", platform.python_version())
         self._octoscan_element.setAttribute("platform", self._platform)
-        self._octoscan_element.setAttribute("system", platform_system)
+        # self._octoscan_element.setAttribute("system", platform_system)
         self._octoscan_element.setAttribute("build", octoscan_build)
         self._octoscan_element.setAttribute("fqdn", getfqdn())
         self._octoscan_element.setAttribute("timestamp", datetime.utcnow().replace(microsecond=0).isoformat())
@@ -99,20 +89,6 @@ class OctoscanArchive(object):
     def queue_warning(self, warning_id, message):
         # type: (int,str) -> None
         self._warning_list.append((warning_id, message))
-
-    def is_windows(self):
-        # type: () -> bool
-        """
-        :return: True if the scanner is running on windows. This is exposed mainly for unit testing on windows
-        """
-        return self._is_windows
-
-    def is_linux(self):
-        # type: () -> bool
-        """
-        :return: True if the scanner is running on linux
-        """
-        return self._is_linux
 
     @staticmethod
     def is_executable(path):

@@ -14,17 +14,6 @@ if 'linux' in platform.system().lower():
     # noinspection PyUnresolvedReferences
     import pwd
 
-# python 3.8 - have to use distro module
-using_distro = False
-
-try:
-    # noinspection PyUnresolvedReferences
-    import distro
-
-    using_distro = True
-except ImportError:
-    pass
-
 
 # noinspection PyUnusedLocal
 def scan_linux_user(scan, options):
@@ -176,18 +165,7 @@ def scan_linux(scan, options):
     :param scan:
     :return:
     """
-    # deprecated in python 3.8 -> distro package
     # noinspection PyDeprecation
-
-    distribution = ""
-    version = ""
-    distribution_id = ""
-
-    if using_distro:
-        (distribution, version, distribution_id) = distro.linux_distribution()
-    else:
-        # noinspection PyUnresolvedReferences
-        (distribution, version, distribution_id) = platform.linux_distribution()
 
     try:
         scan_linux_user(scan, options)
@@ -195,10 +173,6 @@ def scan_linux(scan, options):
         scan.queue_warning(2001, "scan_linux_user failed:" + repr(e))
 
     os_elem = scan.create_element("operating_system")
-    scan.append_info_element(os_elem, "using_python_distro_module", "B", str(using_distro).lower())
-    scan.append_info_element(os_elem, "distribution", "S", distribution)
-    scan.append_info_element(os_elem, "version", "S", version)
-    scan.append_info_element(os_elem, "id", "S", distribution_id)
     scan.append_info_element(os_elem, "platform", "S", platform.platform())
     scan.append_child(os_elem)
 
@@ -206,6 +180,10 @@ def scan_linux(scan, options):
     # will get parsed on import, otherwise some heuristics will be applied on all available release files
     for release_info in glob.glob1("/etc", "*-release"):
         scan.add_file(os.path.join("/etc", release_info), os.path.join("release", release_info))
+
+    # fallback on /usr/lib/*-release
+    for release_info in glob.glob1("/usr/lib", "*-release"):
+        scan.add_file(os.path.join("/usr/lib", release_info), os.path.join("release-usrlib", release_info))
 
     # collect debian_version if it exists
     for release_info in glob.glob1("/etc", "*_version"):
