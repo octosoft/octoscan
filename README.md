@@ -10,8 +10,8 @@ Octoscan 1.10.7 no longer depends on the python distro module.
 On most Linux variants - even on minimal installs - the scanner should now be able to run directly
 without the need to install any additional Linux packages or Python modules.
 
-**_NOTE_** windows support has been removed from octoscan. 
-    windows support was previously only used for module testing.
+**_NOTE_** Windows support has been removed from octoscan. 
+    Windows support was previously only used for module testing.
 
 Requires OctoSAM server version 1.10.6 or newer.
 
