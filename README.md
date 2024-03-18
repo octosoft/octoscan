@@ -201,7 +201,7 @@ sudo python3 octoscan.pyz
 
 #### RHEL 9, Centos 9, Rocky Linux 9 minimal install
 
-The python command is installed by default and points to python 3.9. 
+The `python` command is installed by default and points to python 3.9. 
 
 ```shell
 curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
@@ -223,7 +223,7 @@ sudo python octoscan.pyz
 
 #### Debian 12 minimal network install (with standard utilities)
 
-The python command is installed and points to Python 3.10.
+The `python` command is installed and points to Python 3.10.
 Note that curl may not be installed by default. We recommend to use curl to upload the generated .scan files to the
 OctoSAM upload server.
 
@@ -234,3 +234,16 @@ sudo python3 ./octoscan.pyz
 # sudo apt update
 # sudo apt install curl
 ```
+
+#### SLES 15 minimal install
+
+The `python3` command points to Python 3.6. Execute the scanner with root permissions. Note that the sudo command may not be installed on SLES 15 minimal
+
+```shell
+curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
+python3 octoscan.pyz
+```
+
+
+
+
