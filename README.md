@@ -4,7 +4,7 @@
 
 ### What's new
 
-### Release 1.10.9 - May 2024
+#### Release 1.10.9 - May 2024
 
 - scan of effective user id
 - scan of ipcs configuration if present to detect some server products
