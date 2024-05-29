@@ -1,2 +1,2 @@
 # generated - do not edit
-octoscan_build = '1.10.7.1 2023-11-14'
+octoscan_build = '1.10.9.23 2024-05-29'

@@ -19,6 +19,7 @@ if 'linux' in platform.system().lower():
 def scan_linux_user(scan, options):
     user_elem = scan.create_element("user")
     scan.append_info_element(user_elem, "user_id", "I", str(os.getuid()))
+    scan.append_info_element(user_elem,"effective_user_id", "I", str(os.geteuid()))
     # noinspection PyBroadException
     try:
         scan.append_info_element(user_elem, "login", "S", os.getlogin())
@@ -223,7 +224,13 @@ def scan_linux(scan, options):
     scan.add_command_output(["ip", "addr"], "cmd/ip_addr")
     scan.add_command_output(["ip", "route"], "cmd/ip_route")
     scan.add_command_output(["ps", "-ef"], "cmd/ps_ef")
-    scan.add_command_output(["hostnamectl", "status"], "cmd/hostnamectl")
+
+    if scan.command_exists("hostnamectl"):
+        scan.add_command_output(["hostnamectl", "status"], "cmd/hostnamectl")
+
+    # ipcs can be useful to detect server products such as oracle db (detect oracle sga)
+    if scan.command_exists("ipcs"):
+        scan.add_command_output(["ipcs", "-a"], "cmd/ipcs")
 
     # scan.add_command_output(["service", "--status-all"], "cmd/service_status_all")
     scan.add_command_output(["systemctl", "list-units", "-all", "--no-page"], "cmd/systemctl_units_all")
