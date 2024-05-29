@@ -4,6 +4,13 @@
 
 ### What's new
 
+### Release 1.10.9 - May 2024
+
+- scan of effective user id
+- scan of ipcs configuration if present to detect some server products
+
+Requires OctoSAM server version 1.10.7 or newer.
+
 #### Release 1.10.7 - November 2023
 
 Octoscan 1.10.7 no longer depends on the python distro module.
