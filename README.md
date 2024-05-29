@@ -116,7 +116,7 @@ python3 octoscan.pyz
 
 ### Using an upload server
 
-Octosoft provides a Windows / IIS based upload server for the generated .scan files. A high-performance Linux based upload server is also provided based at [octo-collect](https://github.com/octosoft/octopus-resty), this open source server is based on [openresty](https://openresty.org).
+Octosoft provides a Windows / IIS-based upload server for the generated .scan files. A high-performance Linux-based upload server is also available at [octo-collect](https://github.com/octosoft/octopus-resty), this open source server is based on [openresty](https://openresty.org).
 
 Use the curl utility on Linux and Mac to upload the generated file.
 
@@ -165,7 +165,7 @@ python3 octoscan.pyz -o /tmp
 ### Why is the scanner dependent on python
 
 We decided that a single dependency on a python-minimal installation is easier to handle than the multiple dependencies 
-that we would have with a typical shell based scanner. 
+that we would have with a typical shell-based scanner. 
 The situation is different on macOS, where we can assume certain command-line programs are installed on every machine. 
 
 Due to the diversity of Linux implementations, the Linux scanner is quite more complex than the macOS scanner.
@@ -188,7 +188,7 @@ The source code of the Linux scanner is licensed under the MIT open source licen
 ### Network prerequisites
 
 For best results, all machines in your network should have synchronized clocks.
-Otherwise date and time information in the inventory can be unreliable.
+Otherwise, date and time information in the inventory can be unreliable.
 
 ### Notes for specific Linux variants
 
@@ -218,8 +218,7 @@ sudo ./octoscan.pyz
 
 #### Ubuntu minimal install 
 
-Some minimum ubuntu installs do not include Python by default. 
-In that case you need to first install python-minimal.
+Some minimum ubuntu installs do not include Python by default. In that case, you need to first install python-minimal.
 
 ```bash
 sudo apt-get update
@@ -231,7 +230,7 @@ sudo python octoscan.pyz
 #### Debian 12 minimal network install (with standard utilities)
 
 The `python` command is installed and points to Python 3.10.
-Note that curl may not be installed by default. We recommend to use curl to upload the generated .scan files to the
+Note that curl may not be installed by default. We recommend using curl to upload the generated .scan files to the
 OctoSAM upload server.
 
 ```bash
@@ -244,7 +243,7 @@ sudo python3 ./octoscan.pyz
 
 #### SLES 15 minimal install
 
-The `python3` command points to Python 3.6. Execute the scanner with root permissions. Note that the sudo command may not be installed on SLES 15 minimal
+The `python3` command points to Python 3.6. Execute the scanner with root permissions. Note that the `sudo` command may not be installed on SLES 15 minimal
 
 ```shell
 curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
