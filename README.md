@@ -250,6 +250,15 @@ curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
 python3 octoscan.pyz
 ```
 
+#### Alpine 3
 
+Note that calling the scanner under another user than root is not supported on alpine.
 
+Alpine uses [BusyBox](https://busybox.net), some commands may differ slightly from their GNU pendants.
 
+```shell
+apk update
+apk add --update --no-cache python3 
+wget https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
+python octoscan.pyz
+```

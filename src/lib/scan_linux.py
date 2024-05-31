@@ -19,7 +19,7 @@ if 'linux' in platform.system().lower():
 def scan_linux_user(scan, options):
     user_elem = scan.create_element("user")
     scan.append_info_element(user_elem, "user_id", "I", str(os.getuid()))
-    scan.append_info_element(user_elem,"effective_user_id", "I", str(os.geteuid()))
+    scan.append_info_element(user_elem, "effective_user_id", "I", str(os.geteuid()))
     # noinspection PyBroadException
     try:
         scan.append_info_element(user_elem, "login", "S", os.getlogin())
@@ -112,19 +112,30 @@ def scan_linux_java(scan, options):
     # a special case is when the java command is a link for example ibm java links the java command from bin/java to
     # jre/bin/java. if we would only consider real files, we could not find the jdk installation with our trivial
 
-    find_command.extend([
-        "(", "-path", "/dev", "-o",
-        "-path", "/proc", "-o",
-        "-path", "/run", "-o",
-        "-path", "/sys", "-o",
-        "-path", "/etc", "-o",
-        "!", "-readable", ")",
-        "-prune",
-        "-o", "(", "(", "-type", "f", "-o", "-type", "l", ")",
-        "-executable", "-name", "java",
-        ")",
-        "-print"
-    ])
+    # alpine linux uses BusyBox, the find command is much less powerful
+    # this implies that starting octoscan under another user than root is not supported
+
+    if os.path.exists("/etc/alpine-release"):
+
+        find_command.extend([
+            "-executable", "-type", "f", "-name", "java",
+            "-print"
+        ])
+
+    else:
+        find_command.extend([
+            "(", "-path", "/dev", "-o",
+            "-path", "/proc", "-o",
+            "-path", "/run", "-o",
+            "-path", "/sys", "-o",
+            "-path", "/etc", "-o",
+            "!", "-readable", ")",
+            "-prune",
+            "-o", "(", "(", "-type", "f", "-o", "-type", "l", ")",
+            "-executable", "-name", "java",
+            ")",
+            "-print"
+        ])
 
     # noinspection PyBroadException
     try:
@@ -217,9 +228,11 @@ def scan_linux(scan, options):
                                 "dpkg/installed.txt")
     else:
 
-        fmt = '%{name}\t%{version}\t%{release}\t%{arch}\t%{summary}\t%{installtime}\t%{vendor}\t%{packager}\n'
-
-        scan.add_command_output(["rpm", "-qa", "--queryformat", fmt], "rpm/installed.txt")
+        if scan.command_exists("apk"):
+            scan.add_command_output(["apk", "list", "--installed"], "apk/installed.txt")
+        else:
+            fmt = '%{name}\t%{version}\t%{release}\t%{arch}\t%{summary}\t%{installtime}\t%{vendor}\t%{packager}\n'
+            scan.add_command_output(["rpm", "-qa", "--queryformat", fmt], "rpm/installed.txt")
 
     scan.add_command_output(["ip", "addr"], "cmd/ip_addr")
     scan.add_command_output(["ip", "route"], "cmd/ip_route")
