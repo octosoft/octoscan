@@ -106,7 +106,7 @@ def scan_linux_java(scan, options):
         if os.path.exists(loc):
             find_command.append(loc)
 
-    # exclude /proc /sys /run /dev /etc and non readable folders
+    # exclude /proc /sys /run /dev /etc and non-readable folders
     # this is to make sure we do not recurse in there when the user specifies "/" to scan (not recommended anyway)
     #
     # a special case is when the java command is a link for example ibm java links the java command from bin/java to
@@ -150,8 +150,13 @@ def scan_linux_java(scan, options):
     if os.geteuid() == 0 or options.sudo:
         output = subprocess.check_output(["ps", "-e", "-o", "pid,comm"]).decode(encoding='utf-8')
     else:
-        user = os.getlogin()
-        output = subprocess.check_output(["ps", "-u", user, "-o", "pid,comm"]).decode(encoding='utf-8')
+        try:
+            user = os.getlogin()
+            output = subprocess.check_output(["ps", "-u", user, "-o", "pid,comm"]).decode(encoding='utf-8')
+        except FileNotFoundError:
+            # os.getlogin() may fail on WSL / containers
+            # see https://stackoverflow.com/questions/74187896/os-getlogin-in-docker-container-throws-filenotfounderror
+            output = subprocess.check_output(["ps", "-o", "pid,comm"]).decode(encoding='utf-8')
 
     for line in output.split('\n'):
         token = line.strip().split(' ')
@@ -188,6 +193,20 @@ def scan_linux(scan, options):
     scan.append_info_element(os_elem, "platform", "S", platform.platform())
     scan.append_child(os_elem)
 
+    config_elem = scan.create_element("configuration")
+    scan.append_info_element(config_elem, "tag", "S", options.tag)
+    if options.machine:
+        scan.append_info_element(config_elem, "machine", "S", options.machine)
+    if options.host:
+        scan.append_info_element(config_elem, "host", "S", options.host)
+    if options.cluster:
+        scan.append_info_element(config_elem, "cluster", "S", options.cluster)
+    if options.container:
+        scan.append_info_element(config_elem, "container", "B", str(options.container))
+    if options.virt:
+        scan.append_info_element(config_elem, "virt", "S", options.virt)
+    scan.append_child(config_elem)
+
     # collect various _release info files. if systemctl standard os_release is present this
     # will get parsed on import, otherwise some heuristics will be applied on all available release files
     for release_info in glob.glob1("/etc", "*-release"):
@@ -213,9 +232,11 @@ def scan_linux(scan, options):
     # this uuid could be used for vm to host mapping for virtual machines under vmware
     # it's recommended to run the server scan under root
     #
-    scan.add_folder("/sys/class/dmi/id", "sys/class/dmi/id")
-    if scan.command_exists("udevadm"):
-        scan.add_command_output(["udevadm", "info", "-a", "/sys/class/dmi/id"], "cmd/udevadm_dmi_id")
+    dmi_folder = "/sys/class/dmi/id"
+    if os.path.exists(dmi_folder):
+        scan.add_folder(dmi_folder, "sys/class/dmi/id")
+        if scan.command_exists("udevadm"):
+            scan.add_command_output(["udevadm", "info", "-a", dmi_folder], "cmd/udevadm_dmi_id")
 
     for oratab in ["/etc/oratab", "/var/opt/oracle/oratab"]:
         if os.path.exists(oratab):
@@ -244,6 +265,13 @@ def scan_linux(scan, options):
     # ipcs can be useful to detect server products such as oracle db (detect oracle sga)
     if scan.command_exists("ipcs"):
         scan.add_command_output(["ipcs", "-a"], "cmd/ipcs")
+
+    #
+    # systemd-detect-virt show on what virtualization / container environment we are runnting
+    # not available on alpine, some alpine images have a dummy command that returns 'docker' or similar
+    #
+    if scan.command_exists("systemd-detect-virt"):
+        scan.add_command_output(["systemd-detect-virt"], "cmd/systemd-detect-virt")
 
     # scan.add_command_output(["service", "--status-all"], "cmd/service_status_all")
     scan.add_command_output(["systemctl", "list-units", "-all", "--no-page"], "cmd/systemctl_units_all")

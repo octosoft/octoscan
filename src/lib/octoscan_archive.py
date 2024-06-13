@@ -20,7 +20,7 @@ from .octoscan_build import octoscan_build
 
 class OctoscanArchive(object):
     """
-        A octoscan archive is a zip file that contains multiple files and an XML document octoscan.xml
+        An octoscan archive is a zip file that contains multiple files and an XML document octoscan.xml
         OctoscanArchive provides methods to add files, command output and strings to the archive,
         as well as to build the standardized octoscan.xml document.
     """
@@ -148,7 +148,7 @@ class OctoscanArchive(object):
         """
         Add a string to the archive as zip entry named 'name'
         :param str_to_add: string to add
-        :param name: name of the zip.entry
+        :param name: name of the zip entry
         :param dt: datetime, optional if not specified, current date time is assumed
         :return: None
         """

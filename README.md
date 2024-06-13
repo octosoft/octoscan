@@ -4,6 +4,16 @@
 
 ### What's new
 
+#### Release 1.10.9 - June 2024
+
+- new command-line options to override machine, cluster, virtualization, and host names in clustered container environments.
+  These options require OctoSAM server version 1.10.9 or newer.
+
+- for systemd-based systems, detect the virtualization technology using the `systemd-detect-virt` command.
+  The improved virtualization recognition requires OctoSAM server version 1.10.9 or newer.
+
+- gracefully handle an exception that os.getlogin() can throw on container platforms
+
 #### Release 1.10.9 - May 2024
 
 - scan of effective user id
@@ -44,6 +54,9 @@ Note that some distros provide curl while others provide wget by default.
 For uploading the produced scan files we recommend
 that you install curl if it's not already installed.
 
+**_NOTE:_** The indicated download link is for test and integration only. 
+Of course, in production environments you should load the scanner from a controlled location inside your network.
+
 #### Download using curl
 
 ```sh
@@ -70,19 +83,19 @@ git clone https://github.com/octosoft/octoscan
 
 ### Invocation and collection of generated files
 
-Usually the scanner is invoked using existing management infrastructure.
+Usually, the scanner is invoked using existing management infrastructure.
 
-On workstations and client systems, it's highly recommended to start the scanner in the user's 
-context (logon scripts,) as that gives you valuable device affinity information. 
+On workstations and client systems, it's highly recommended to start the scanner in the user's
+context (logon scripts, etc.) as that gives you valuable device affinity information.
 
-On servers, the scanner should be started in the root context, otherwise scanned information
+On servers, the scanner should be started in the root context. Otherwise, scanned information
 may be incomplete.
 
 ```bash
 FILE=$(./octoscan.pyz -o /tmp)
 ```
 
-The program emits the generated filename to stdout, use the variable `${FILE}` to further process the file. 
+The program emits the generated filename to stdout. Use the variable `${FILE}` to further process the file.
 You are completely free on how to transfer the generated files to the OctoSAM Import Service import folder.
 
 A list of all options can be obtained using the help option
@@ -90,6 +103,29 @@ A list of all options can be obtained using the help option
 ```bash
 ./octoscan.pyz --help
 ```
+
+### Running octoscan in a container environment
+Use your existing container orchestration tools to start the scanner in each container.
+Depending on your base image you may have to install Python first.
+
+In your orchestration or management environment, you may already have more information about the settings than the scanner can find out in a platform-independent way.
+
+Octoscan supports several options to reflect this environment information to the OctoSAM inventory:
+
+#### container Option
+Specify --container if you run it in a container environment.
+
+#### machine Option
+You can specify another machine name than what is returned by `hostname` within the container. 
+The specified value (FQDN format) overrides the machine name in OctoSAM. Make sure the value is unique.
+
+#### host Option
+You can specify an FQDN for your container host (pod).§
+Specify the same FQDN that you get when you scan the host machine from outside the container cluster. 
+DNS may be different inside and outside the container environment.
+
+#### cluster Option
+Specify the name of your cluster. Cluster names must be unique.
 
 ### Common error messages when starting the scanner
 
@@ -116,7 +152,7 @@ python3 octoscan.pyz
 
 ### Using an upload server
 
-Octosoft provides a Windows / IIS-based upload server for the generated .scan files. A high-performance Linux-based upload server is also available at [octo-collect](https://github.com/octosoft/octopus-resty), this open source server is based on [openresty](https://openresty.org).
+Octosoft provides a Windows / IIS-based upload server for the generated .scan files. A high-performance Linux-based upload server is also available at [octo-collect](https://github.com/octosoft/octopus-resty), this Open Source server is based on [openresty](https://openresty.org).
 
 Use the curl utility on Linux and Mac to upload the generated file.
 
@@ -131,20 +167,20 @@ fi
 ```
 
 In practice, you need to add error handling and ideally handle the case that the upload server may not
-be available by caching generated .scal files. 
+be available by caching generated .scal files.
 
 ### Linux Java process scan
-Octoscan performs an in-depth scan of running java processes. If run under root 
+Octoscan performs an in-depth scan of running Java processes. If run under root
 the scan will read all java processes. Otherwise, it reads processes running under the same user as the scan only.
-If not running under root, the scan user must have permissions to start all detected java binaries 
-as detailed version information can typically only be read through the java binary --version option.
-For best java scan results on servers it's highly recommended to run the scan with root privileges.
+If not running under root, the scan user must have the permissions to start all detected Java binaries
+as detailed version information can typically only be read through the Java binary --version option.
+For best Java scan results on servers, it's highly recommended to run the scan with root privileges.
 
 ### Linux Java filesystem scan
-Octoscan scans common installation filesystem paths for java versions. 
-If you have own conventions for installing software, specify the -J / --java option.
+Octoscan scans common installation filesystem paths for Java versions.
+If you have your own conventions for installing software, specify the -J / --java option.
 Paths that do not exist or are not accessible are silently ignored.
-For best java scan results on servers it's highly recommended to run the scan with root privileges.
+For best Java scan results on servers, it's highly recommended to run the scan with root privileges.
 
 ```bash
 octoscan.pyz -java "/app/java:/u00/myapp/lib"
@@ -152,8 +188,8 @@ octoscan.pyz -java "/app/java:/u00/myapp/lib"
 
 ### Python Version
 
-octoscan.pyz assumes that it is called using the current system implementation of python. 
-Currently this is python 2.7 or 3.6 or newer on most systems. 
+octoscan.pyz assumes that it is called using the current system implementation of Python.
+Currently, this is Python 2.7 or 3.6 or newer on most systems. 
 If called directly it uses the python available using `/usr/bin/env python`.
 
 You can also call python explicitly:
@@ -162,11 +198,11 @@ You can also call python explicitly:
 python3 octoscan.pyz -o /tmp
 ```
 
-### Why is the scanner dependent on python
+### Why use Python?
 
-We decided that a single dependency on a python-minimal installation is easier to handle than the multiple dependencies 
-that we would have with a typical shell-based scanner. 
-The situation is different on macOS, where we can assume certain command-line programs are installed on every machine. 
+We decided that a single dependency on a python-minimal installation is easier to handle than the multiple dependencies
+that we would have with a typical shell-based scanner.
+The situation is different on macOS, where we can assume certain command-line programs are installed on every machine.
 
 Due to the diversity of Linux implementations, the Linux scanner is quite more complex than the macOS scanner.
 Python allows us to implement a complex scan without writing temporary files, this improves performance considerably.
@@ -195,9 +231,9 @@ Otherwise, date and time information in the inventory can be unreliable.
 The supported Linux variants are tested with their standard installs. 
 If you use a minimal install, some required modules may not be installed by default.
 
-#### RHEL 8, Centos 8, Rocky Linux 8 minimal install
+#### RHEL 8, Centos 8, Rocky Linux 8, minimal install
 
-The python3 command may not be installed by default. The standard system python is python 3.6.
+The python3 command may not be installed by default. The standard system Python is Python 3.6.
 
 ```shell
 sudo yum update
@@ -206,19 +242,19 @@ curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
 sudo python3 octoscan.pyz
 ```
 
-#### RHEL 9, Centos 9, Rocky Linux 9 minimal install
+#### RHEL 9, Centos 9, Rocky Linux 9, Alma Linux 9, minimal install
 
-The `python` command is installed by default and points to python 3.9. 
+The `python` or `python3` commands are installed by default and point to Python 3.9. 
 
 ```shell
 curl -OL https://github.com/octosoft/octoscan/raw/master/octoscan.pyz
 chmod +x octoscan.pyz
-sudo ./octoscan.pyz
+sudo python3 ./octoscan.pyz
 ```
 
 #### Ubuntu minimal install 
 
-Some minimum ubuntu installs do not include Python by default. In that case, you need to first install python-minimal.
+Some minimum Ubuntu installs do not include Python by default. In that case, you need to first install python-minimal.
 
 ```bash
 sudo apt-get update
@@ -252,7 +288,7 @@ python3 octoscan.pyz
 
 #### Alpine 3
 
-Note that calling the scanner under another user than root is not supported on alpine.
+**_NOTE:_** Calling the scanner without root permission is not supported on Alpine.
 
 Alpine uses [BusyBox](https://busybox.net), some commands may differ slightly from their GNU pendants.
 

@@ -41,6 +41,22 @@ def main():
                       help="specify unique id to use",
                       default=str(uuid1()))
 
+    parser.add_option("-m", "--machine", dest="machine", default="",
+                      help="for container scans override machine name of the container")
+
+    parser.add_option("-c", "--cluster", dest="cluster", default="",
+                      help="for container scans specify cluster name where the container is member")
+
+    parser.add_option("-C", "--container", dest="container",
+                      action="store_true",
+                      help="signal that we are scanning a container")
+
+    parser.add_option("-V", "--virt", dest="virt", default="",
+                      help="For systems that do not provide systemd-detect-virt, specify the virtualization. See systemd-detect-virt man page.")
+
+    parser.add_option("-H", "--host", dest="host", default="",
+                      help="for container scans specify host (pod) name")
+
     parser.add_option("-S", "--sudo", dest="sudo",
                       action="store_true",
                       help="use sudo to access protected resources, sudoers has to allow no password access")
@@ -54,6 +70,10 @@ def main():
     parser.add_option("--version", dest="version",
                       action="store_true", default=False,
                       help="print version information and exit")
+
+    parser.add_option("-t", "--tag", dest="tag",
+                      default="",
+                      help="specify a tag value that can be used to identify this scan")
 
     (options, args) = parser.parse_args()
 
